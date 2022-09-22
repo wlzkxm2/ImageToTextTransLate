@@ -13,16 +13,18 @@ pip install requests
 
 **1. 네이버 클로버 OCR (이미지 텍스트 추출) 은 100회 이하 무료 이며 그 이상은 회당 3원입니다.**
 
-**2. 사용자의 과도한 호출및 번역으로 인한 피해는 개발자 본인은 책임지지 않습니다**
+**2. Papago 번역으로 한 번에 번역할 수 있는 분량은 최대 5,000자이며, 하루 번역 처리 한도는 10,000자입니다.**
 
-**3. Papago 번역으로 한 번에 번역할 수 있는 분량은 최대 5,000자이며, 하루 번역 처리 한도는 10,000자입니다.**
+**3. 사용자의 과도한 호출및 번역으로 인한 피해는 개발자 본인은 책임지지 않습니다**
+
+**4. 사용자의 이미지 번역으로 발생하는 모든 피해 는 개발자 본인은 책임지지 않습니다** 
 
 ---
 
 ---
 ## 다운로드
 
-[다운로드](https://github.com/wlzkxm2/ImageToTextTransLate/raw/main/ImageTranslator.exe)
+[프로그램_다운로드](https://github.com/wlzkxm2/ImageToTextTransLate/raw/main/ImageTranslator.exe)
 
 ---
 
