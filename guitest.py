@@ -8,12 +8,9 @@ import json
 import base64
 from subprocess import call
 from tkinter import messagebox
+import tkinter.ttk
 import requests
-import re
 
-from fnmatch import translate
-import pandas as pd
-import sys
 import urllib.request
 
 # ImageTranslate 기본 디렉토리
@@ -23,6 +20,18 @@ import urllib.request
 
 
 findFileLists = []
+
+def refresh():
+    print("refresh")
+    list.delete(0, END)
+
+    with os.scandir("./ImageTranslate/ImageInput") as entries:
+        for entry in entries:
+            print(entry.name)
+            findFiles = entry.name
+            if findFiles.endswith(".jpg") or findFiles.endswith(".png") :
+                list.insert(END, entry.name)
+                findFileLists.append(entry.name)
 
 def createDirectory(directory):
     try:
@@ -41,66 +50,19 @@ def OpenDirectory(where):
 
 def TkinterSet():
     window.title("ImageTranslate")
-    window.geometry("300x300")
+    window.geometry("330x330")
     window.resizable(False, False)
 
-def Main():
-    global findFileLists
+def DirectoryCheak():
     createDirectory("ImageTranslate")
     createDirectory("ImageTranslate\ImageInput")
     createDirectory("ImageTranslate\JsonOutput")
     createDirectory("ImageTranslate\TextOutput")
-
-    # file_list = glob.glob(r"data\*.jpg")
-    # print(file_list)
-    # file_list += glob.glob(r"data\*.png")
-    # print(file_list)
-
-    frame = tkinter.Frame(window)
-
-    scrollbar = tkinter.Scrollbar(frame)
-    scrollbar.pack(side = "right", fill = "y")
-
-    list = tkinter.Listbox(frame, yscrollcommand = scrollbar.set)
-
-    title = tkinter.Label(window, text = "파일 목록")
-    line = tkinter.Label(window, text = "----------------------------------------")
-
-    title.pack()
-    line.pack()
-
-    with os.scandir("data") as entries:
-        for entry in entries:
-            print(entry.name)
-            findFiles = entry.name
-            if findFiles.endswith(".jpg") or findFiles.endswith(".png") :
-                list.insert(END, entry.name)
-                findFileLists.append(entry.name)
-            # label = tkinter.Label(window, text = entry.name)
-            # label.pack()
-
-    # print(f"list : {findFileLists}")
-
-    list.pack(side = "left")
-
-    scrollbar["command"] = list.yview
-
-    frame.pack()
-
-    transLate_btn = tkinter.Button(window, text = "번역하기")
-    openFolder = tkinter.Button(window, text = "이미지 경로 열기", command = lambda : OpenDirectory("ImageInput"))
-    openTextFolder = tkinter.Button(window, text = "번역 텍스트 경로 열기", command = lambda : OpenDirectory("TextOutput"))
-    # openTextFolder = tkinter.Button(window, text = "Json 경로 열기", command = lambda : OpenDirectory("JsonOutput"))
-    # openFolder.config(command = OpenDirectory("ImageTranslate\ImageInput"))
-    # btn.config(TransLate)
-    transLate_btn.pack()
-    openFolder.pack()
-    openTextFolder.pack()
-
+    
 def FindImageToTextWork(filename) :
     position = filename.find(".")
     filenameNotdot = filename[:position]
-    # print(filenameNotdot)
+    print(filenameNotdot)
 
     filepath = r'ImageTranslate\JsonOutput\\' + filenameNotdot + ".json"
 
@@ -133,7 +95,7 @@ def FindImageToTextWork(filename) :
     data = json.dumps(data)
     # print(data)
     response = requests.post(URL, data=data, headers=headers)
-    # print(response.text)
+    # print(response.json_ImageText)
     res = json.loads(response.text)
     # print(res)
 
@@ -160,102 +122,148 @@ def FindImageToTextWork(filename) :
     with open(filepath, 'w', encoding='UTF8') as f:
         f.write(json.dumps(res, ensure_ascii = False))
 
-class TranslateWork(filename) :
+def TranslateWork(filename) :
+    # filename : ex.jpg 
+    # filenameNotdot : ex
+    global TransOutputText
+
     position = filename.find(".")
-    filenameNotdot = filename[:position]
+    filenameNotdot = filename[:position]  
+    # print(f"input : {filename}")      
+    # print(f"filenameNotdot : {filenameNotdot}")      
 
     path = './ImageTranslate/JsonOutput/' + filenameNotdot + '.json'
-    file_path = r'C:\Users\netk\Desktop\pyProject\output\text.json'
+    file_path = r'\ImageTranslate\JsonOutput\\' + filenameNotdot + '.json'
 
     TransOutputText = []
 
-    def JAtoKO(text):
-        client_id = "QRAMv2UL07BmEx67cKxb" # 개발자센터에서 발급받은 Client ID 값
-        client_secret = "KNqoL6cgN8" # 개발자센터에서 발급받은 Client Secret 값
-        jatext = urllib.parse.quote(text)
-        data = "source=ja&target=ko&text=" + jatext
-        url = "https://openapi.naver.com/v1/papago/n2mt"
-        request = urllib.request.Request(url)
-        request.add_header("X-Naver-Client-Id",client_id)
-        request.add_header("X-Naver-Client-Secret",client_secret)
-        response = urllib.request.urlopen(request, data=data.encode("utf-8"))
-        rescode = response.getcode()
-        if(rescode==200):
-            response_body = response.read()
-            # print(response_body.decode('utf-8'))
-            transjson = response_body.decode('utf-8')
-            TranslateWork.AfterTreatment(transjson)
-        else:
-            print("Error Code:" + rescode)
-
-
-    def AfterTreatment(TransText):
-        global TransOutputText
-        findTextPosition = 0
-        findTextfinalPosition = 0
-        findTextPosition += TransText.find("translatedText")
-
-        findTextPosition += TransText[findTextPosition:].find(":\"")
-
-        findTextPosition += TransText[findTextPosition:].find("\"")
-
-        findTextfinalPosition = findTextPosition + TransText[findTextPosition:].find("\",")
-        resultText = TransText[findTextPosition+1:findTextfinalPosition+1]
-
-        TransOutputText.append(resultText)
-
-    def outputData():
-        global TransOutputText
-        with open("JA_to_KO_Trans.txt", "w", encoding="UTF-8") as file :
-            for name in TransOutputText :
-                file.write(name + '\n')
-        print("추출이 완료되었습니다")
-
-
-
-    with open('./output/text.json', 'r', encoding='UTF8') as file:
+    with open(path , 'r', encoding='UTF8') as file:
         data = json.load(file)
 
-    # print(json.dumps(data, ensure_ascii = False))
+    json_ImageText = ""     # 텍스트를 담기위한 string
 
-    # print(pd.json_normalize(data['images']))
-    # pd.json_normalize(data)
-
-    for key, value in data.items() :
-        # print(key)
-        # print('---------------------------------------------')
-        if key == 'images' :
-            print('------------------------')
-
-
-    # print(data['images']['fields'])d
-
-    # print(type(data['images']))
-
-    # print(data.get('images'))
-
-    # print(len(data['images'][0]['fields']))     # 길이
-    json_ImageText = ""
     for j in range(len(data['images'][0]['fields'])) :
         for i in data['images'][0]['fields'][j]['inferText']:
             json_ImageText += i 
+  
 
-    JAtoKO(json_ImageText)
+    # JAtoKO(json_ImageText)
+    client_id = "QRAMv2UL07BmEx67cKxb" # 개발자센터에서 발급받은 Client ID 값
+    client_secret = "KNqoL6cgN8" # 개발자센터에서 발급받은 Client Secret 값
+    jatext = urllib.parse.quote(json_ImageText)
+    data = "source=ja&target=ko&text=" + jatext
+    url = "https://openapi.naver.com/v1/papago/n2mt"
+    request = urllib.request.Request(url)
+    request.add_header("X-Naver-Client-Id",client_id)
+    request.add_header("X-Naver-Client-Secret",client_secret)
+    response = urllib.request.urlopen(request, data=data.encode("utf-8"))
+    rescode = response.getcode()
+    if(rescode==200):
+        response_body = response.read()
+        # print(response_body.decode('utf-8'))
+        transjson = response_body.decode('utf-8')
+        # AfterTreatment(transjson)
+        findTextPosition = 0
+        findTextfinalPosition = 0
+        findTextPosition += transjson.find("translatedText")
 
-    outputData()
+        findTextPosition += transjson[findTextPosition:].find(":\"")
 
-    # for i in data['images'].items() :
-        # print(i)
+        findTextPosition += transjson[findTextPosition:].find("\"")
+
+        findTextfinalPosition = findTextPosition + transjson[findTextPosition:].find("\",")
+        resultText = transjson[findTextPosition+1:findTextfinalPosition+1]
+
+        TransOutputText.append(resultText)
+
+    else:
+        print("Error Code:" + rescode)
+
+    # outputData()
+    with open("./ImageTranslate/TextOutput/" + filenameNotdot + ".txt", "w", encoding="UTF-8") as file :
+        for name in TransOutputText :
+            file.write(name + '\n')
+    print("추출이 완료되었습니다")
 
 
-        
+def trans_start():
+    print("start")
+    size = 0
+    for FileName in findFileLists:
+        FindImageToTextWork(FileName)
+        size += 100 / len(findFileLists)
+        currProgrssbar.set(size)
+        progressbar.update()
+
+    for FileName in findFileLists : 
+        TranslateWork(FileName)
+    
+    messagebox.showinfo("작업완료", "작업이 완료되었습니다")
+
+
+
 
 window = tkinter.Tk()
 
 TkinterSet()
-Main()
+DirectoryCheak()
+
+frame = tkinter.Frame(window)
+
+scrollbar = tkinter.Scrollbar(frame)
+scrollbar.pack(side = "right", fill = "y")
+
+list = tkinter.Listbox(frame, yscrollcommand = scrollbar.set)
+
+title = tkinter.Label(window, text = "파일 목록")
+line = tkinter.Label(window, text = "----------------------------------------")
+
+title.pack()
+line.pack()
+
+with os.scandir("./ImageTranslate/ImageInput") as entries:
+    for entry in entries:
+        print(entry.name)
+        findFiles = entry.name
+        if findFiles.endswith(".jpg") or findFiles.endswith(".png") :
+            list.insert(END, entry.name)
+            findFileLists.append(entry.name)
+        # label = tkinter.Label(window, json_ImageText = entry.name)
+        # label.pack()
+
+# print(f"list : {findFileLists}")
+
+list.pack(side = "left")
+
+scrollbar["command"] = list.yview
+
+frame.pack()
+
+transLate_btn = tkinter.Button(window, text = "번역하기", command = trans_start)
+
+openFolder = tkinter.Button(window, text = "이미지 경로 열기", command = lambda : OpenDirectory("ImageInput"))
+
+openTextFolder = tkinter.Button(window, text = "번역 텍스트 경로 열기", command = lambda : OpenDirectory("TextOutput"))
+refreshBtn = tkinter.Button(window, text = "새로고침", command = refresh)
+
+# openTextFolder = tkinter.Button(window, json_ImageText = "Json 경로 열기", command = lambda : OpenDirectory("JsonOutput"))
+# openFolder.config(command = OpenDirectory("ImageTranslate\ImageInput"))
+# btn.config(TransLate)
+transLate_btn.pack()
+openFolder.pack()
+openTextFolder.pack()
+refreshBtn.pack()
+
+
+currProgrssbar = tkinter.DoubleVar()
+progressbar = tkinter.ttk.Progressbar(window, maximum = 100, variable = currProgrssbar)
+progressbar.pack()
+
 
 # for FileName in findFileLists:
+#     TranslateWork(FileName)
+
+# for FileName in findFileLists : 
 #     TranslateWork(FileName)
 
 
