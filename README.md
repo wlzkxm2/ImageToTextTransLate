@@ -22,9 +22,9 @@ pip install requests
 ---
 
 ---
-## 다운로드
+## 이미지 번역 프로그램 다운로드
 
-[프로그램_다운로드](https://github.com/wlzkxm2/ImageToTextTransLate/raw/main/ImageTranslator.exe)
+[다운로드](https://github.com/wlzkxm2/ImageToTextTransLate/raw/main/ImageTranslator.exe)
 
 ---
 
