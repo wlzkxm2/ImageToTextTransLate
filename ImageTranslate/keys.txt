@@ -1,4 +1,0 @@
-Secret Key = 'Input_Secret_Key'
-APIGW = 'Input_APIGW_Key'
-Client ID = 'Input_Client ID'
-Client Secret = 'Input_Client_Secret_Key'
