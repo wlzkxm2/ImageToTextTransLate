@@ -117,7 +117,7 @@ def FindImageToTextWork(filename) :
 
     filepath = r'ImageTranslate\JsonOutput\\' + filenameNotdot + ".json"
 
-    with open(r"C:\Users\netk\Desktop\pyProject\data\\" + filename , "rb") as f:
+    with open(r"ImageTranslate\ImageInput\\" + filename , "rb") as f:
         img = base64.b64encode(f.read())
 
     # 본인의 APIGW Invoke URL로 치환
