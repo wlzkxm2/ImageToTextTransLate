@@ -20,6 +20,7 @@ pip install requests
 ---
 
 ---
+## 다운로드
 
 [다운로드](https://github.com/wlzkxm2/ImageToTextTransLate/raw/main/ImageTranslator.exe)
 
