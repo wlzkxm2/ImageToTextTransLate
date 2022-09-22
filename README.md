@@ -32,7 +32,7 @@ pip install requests
 ## **프로그램 사용방법**
 
 0. 프로그램을 최초 실행시 키가 없다며 확인해 달라고 합니다. 
-그 경우에는 **실행 파일이 있는 곳에 ImageTranslate 폴더에 가시면 Keys.text 가 있습니다.** 그곳에 키를 넣어주세요
+그 경우에는 **실행 파일이 있는 곳에 ImageTranslate 폴더에 가시면 Keys.txt 가 있습니다.** 그곳에 키를 넣어주세요
 
 1. 이미지는 \ImageTranslate\ImageInput 폴더에 넣어주세요. 이미지를 인식하는거라 폰트 가독성에 따라서 추출이 제대로 안될 수도 있습니다
 
