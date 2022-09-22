@@ -21,6 +21,12 @@ import urllib.request
 
 findFileLists = []
 
+allData = ''
+Secret_Key = ''
+APIGW_key = ''
+Client_ID = ''
+Client_Secret = ''
+
 def refresh():
     print("refresh")
     list.delete(0, END)
@@ -39,6 +45,51 @@ def createDirectory(directory):
             os.makedirs(directory)
     except OSError:
         print("Error: Failed to create the directory.")
+
+def getKeys():
+    global allData
+    global Secret_Key
+    global APIGW_key
+    global Client_ID
+    global Client_Secret
+    try :
+        with open(r'ImageTranslate\keys.txt', 'r') as file :
+            allData = file.read()
+    except:
+        default_Keys = "Secret Key = 'Input_Secret_Key'\nAPIGW = 'Input_APIGW_Key'\nClient ID = 'Input_Client ID'\nClient Secret = 'Input_Client_Secret_Key'"
+        keyFile = open(r'ImageTranslate\keys.txt', "w")
+        keyFile.write(default_Keys)
+        keyFile.close()
+        messagebox.showinfo("키가 없음",  "네이버 Clova Key 또는 Papago Key가 없습니다. Keys.txt 파일을 확인해 주세요")
+    
+    position = allData.find("\'") + 1
+    back_position = position + allData[position:].find("\'")
+    print("-------------------------------------------------")
+    print("Secret Key : " + allData[position : back_position])
+
+    Secret_Key = allData[position : back_position]
+
+    position = back_position + 2
+    position = position + allData[position:].find("\'") + 1
+    back_position = position + allData[position:].find("\'")
+    print("-------------------------------------------------")
+    print("APIGW : " + allData[position : back_position])
+
+    APIGW_key = allData[position : back_position]
+
+    position = back_position + 2
+    position = position + allData[position:].find("\'") + 1
+    back_position = position + allData[position:].find("\'")
+    print("Client ID : " + allData[position : back_position])
+
+    Client_ID = allData[position : back_position]
+
+    position = back_position + 2
+    position = position + allData[position:].find("\'") + 1
+    back_position = position + allData[position:].find("\'")
+    print("Client Secret : " + allData[position : back_position])
+
+    Client_Secret = allData[position : back_position]
 
 def OpenDirectory(where):
     directory = "ImageTranslate\\" + where
@@ -70,10 +121,10 @@ def FindImageToTextWork(filename) :
         img = base64.b64encode(f.read())
 
     # 본인의 APIGW Invoke URL로 치환
-    URL = "https://07kcy59we0.apigw.ntruss.com/custom/v1/18293/7df69ef5ffb9d844c54a0aa9e3c98e78aaee795d5f08b6c103cb21fd09ad4442/general"
+    URL = APIGW_key
         
     # 본인의 Secret Key로 치환
-    KEY = "UUV2ekxqdmt6cFpybkZlZ1FCRUFWcW9kcnVjdmxZekI="
+    KEY = Secret_Key
         
     headers = {
         "Content-Type": "application/json",
@@ -148,8 +199,8 @@ def TranslateWork(filename) :
   
 
     # JAtoKO(json_ImageText)
-    client_id = "QRAMv2UL07BmEx67cKxb" # 개발자센터에서 발급받은 Client ID 값
-    client_secret = "KNqoL6cgN8" # 개발자센터에서 발급받은 Client Secret 값
+    client_id = Client_ID # 개발자센터에서 발급받은 Client ID 값
+    client_secret = Client_Secret # 개발자센터에서 발급받은 Client Secret 값
     jatext = urllib.parse.quote(json_ImageText)
     data = "source=ja&target=ko&text=" + jatext
     url = "https://openapi.naver.com/v1/papago/n2mt"
@@ -207,6 +258,10 @@ window = tkinter.Tk()
 
 TkinterSet()
 DirectoryCheak()
+getKeys()
+
+print(f"{Secret_Key} / {APIGW_key} / {Client_ID} / {Client_Secret}")
+
 
 frame = tkinter.Frame(window)
 
