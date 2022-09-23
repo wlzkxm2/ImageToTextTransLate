@@ -10,12 +10,16 @@ import base64
 from subprocess import call
 from tkinter import messagebox
 import tkinter.ttk
+from unittest import result
+from xml.etree.ElementPath import findtext
 import requests
 
 import urllib.request
 
 import pytesseract as pyt
 import cv2
+from pytesseract import Output
+import pickle
 
 # ImageTranslate 기본 디렉토리
 # ImageInput 번역할 이미지
@@ -251,12 +255,50 @@ def PapagoTranslateWork(filename) :
     print("추출이 완료되었습니다")
 
 def TesseractFindImageToTextWork(filename):
+    global imgRead
     pyt.pytesseract.tesseract_cmd = r"data\tesseract-ocr\tesseract"
+    imgPath = r"ImageTranslate\ImageInput\\" + filename
     # config = ("-l jpn-vert --oem 3 --psm 11")
-    text = pyt.image_to_string(r"ImageTranslate\ImageInput\\" + filename, lang = "jpn_vert")
+    text = pyt.image_to_string(imgPath, lang = "jpn_vert")
     print("-----------------------------")
     print(text)
     print("-----------------------------")
+    imgRead = cv2.imread(imgPath)
+    imgResult = pyt.image_to_data(imgRead, output_type=Output.DICT)
+
+    # json_imgInfo = {
+    #     "text" : findtext,
+    #     "x" : x,
+    #     "y" : y,
+    #     "w" : w,
+    #     "h" : h
+    # }
+
+    print(json_imgInfo.values)
+
+    for i in range(0, len(imgResult["text"])):
+        textPositionInfo = ""
+        x = imgResult["left"][i]
+        textPositionInfo += x
+        y = imgResult["top"][i]
+        textPositionInfo += y
+
+        w = imgResult["width"][i]
+        textPositionInfo += w
+        h = imgResult["height"][i]
+        textPositionInfo += x
+
+        imgtext = imgResult["text"][i]
+        conf = int(imgResult["conf"][i])
+        if conf > 0:
+            imgtext = "".join([c if ord(c) < 128 else "" for c in imgtext]).strip()
+            cv2.rectangle(imgRead, (x, y), (x + w, y + h), (0, 255, 0), 1)
+            # cv2.putText(imgRead, text, (x, y -10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 200), 2)
+        json_imgInfo = {"text" : imgtext, "x" : x, "y" : y, "w" : w, "h" : h, "conf" : conf}
+    cv2.imshow('cutom', imgRead)
+    cv2.waitKey(0)  
+
+
 
 
 
@@ -349,6 +391,7 @@ refreshBtn.pack()
 currProgrssbar = tkinter.DoubleVar()
 progressbar = tkinter.ttk.Progressbar(window, maximum = 100, variable = currProgrssbar)
 progressbar.pack()
+
 
 
 # for FileName in findFileLists:
