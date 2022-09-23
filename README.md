@@ -5,6 +5,9 @@
 pip install opencv-contrib-python
 pip install requests
 
+pip install pillow
+pip install pytesseract
+
 ```
 ---
 ## ***※주의사항※***
