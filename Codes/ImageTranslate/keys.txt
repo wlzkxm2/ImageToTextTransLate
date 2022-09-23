@@ -1,4 +1,4 @@
-Secret Key = 'Input_Secret_Key'
-APIGW = 'Input_APIGW_Key'
-Client ID = 'Input_Client ID'
-Client Secret = 'Input_Client_Secret_Key'
+Secret Key = 'TE1UcmhiSFpzTEJGaFdTRWRNR1luU2llWWZtUGtBaE0='
+APIGW = 'https://07kcy59we0.apigw.ntruss.com/custom/v1/18293/7df69ef5ffb9d844c54a0aa9e3c98e78aaee795d5f08b6c103cb21fd09ad4442/general'
+Client ID = 'QRAMv2UL07BmEx67cKxb'
+Client Secret = 'KNqoL6cgN8'

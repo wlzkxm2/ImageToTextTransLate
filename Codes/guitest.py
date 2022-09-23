@@ -1,4 +1,5 @@
 from distutils import file_util
+from distutils.command.config import config
 from fileinput import filename
 from tkinter import *
 import os
@@ -12,6 +13,9 @@ import tkinter.ttk
 import requests
 
 import urllib.request
+
+import pytesseract as pyt
+import cv2
 
 # ImageTranslate 기본 디렉토리
 # ImageInput 번역할 이미지
@@ -101,7 +105,7 @@ def OpenDirectory(where):
 
 def TkinterSet():
     window.title("ImageTranslate")
-    window.geometry("330x330")
+    window.geometry("800x800")
     window.resizable(False, False)
 
 def DirectoryCheak():
@@ -109,8 +113,11 @@ def DirectoryCheak():
     createDirectory("ImageTranslate\ImageInput")
     createDirectory("ImageTranslate\JsonOutput")
     createDirectory("ImageTranslate\TextOutput")
+    createDirectory("data")
     
-def FindImageToTextWork(filename) :
+
+    
+def ClovaFindImageToTextWork(filename) :
     position = filename.find(".")
     filenameNotdot = filename[:position]
     print(filenameNotdot)
@@ -173,7 +180,7 @@ def FindImageToTextWork(filename) :
     with open(filepath, 'w', encoding='UTF8') as f:
         f.write(json.dumps(res, ensure_ascii = False))
 
-def TranslateWork(filename) :
+def PapagoTranslateWork(filename) :
     # filename : ex.jpg 
     # filenameNotdot : ex
     global TransOutputText
@@ -184,18 +191,25 @@ def TranslateWork(filename) :
     # print(f"filenameNotdot : {filenameNotdot}")      
 
     path = './ImageTranslate/JsonOutput/' + filenameNotdot + '.json'
+    path = './ImageTranslate/JsonOutput/' + filenameNotdot + '.txt'
     file_path = r'\ImageTranslate\JsonOutput\\' + filenameNotdot + '.json'
 
     TransOutputText = []
-
     with open(path , 'r', encoding='UTF8') as file:
         data = json.load(file)
 
     json_ImageText = ""     # 텍스트를 담기위한 string
 
-    for j in range(len(data['images'][0]['fields'])) :
-        for i in data['images'][0]['fields'][j]['inferText']:
-            json_ImageText += i 
+    # print("---------------------------------------------------------")
+    # print(f"fileType : {type(data)}")
+    # print("---------------------------------------------------------")
+
+    if(type(data) == dict):
+        for j in range(len(data['images'][0]['fields'])) :
+            for i in data['images'][0]['fields'][j]['inferText']:
+                json_ImageText += i
+    else:
+        json_ImageText = data 
   
 
     # JAtoKO(json_ImageText)
@@ -236,22 +250,40 @@ def TranslateWork(filename) :
             file.write(name + '\n')
     print("추출이 완료되었습니다")
 
+def TesseractFindImageToTextWork(filename):
+    pyt.pytesseract.tesseract_cmd = r"data\tesseract-ocr\tesseract"
+    # config = ("-l jpn-vert --oem 3 --psm 11")
+    text = pyt.image_to_string(r"ImageTranslate\ImageInput\\" + filename, lang = "jpn_vert")
+    print("-----------------------------")
+    print(text)
+    print("-----------------------------")
+
+
+
+
+    
 
 def trans_start():
     print("start")
+    for FileName in findFileLists : 
+        PapagoTranslateWork(FileName)
+    messagebox.showinfo("작업완료", "작업이 완료되었습니다")
+
+def Clova_Trans_Start():
     size = 0
     for FileName in findFileLists:
-        FindImageToTextWork(FileName)
+        ClovaFindImageToTextWork(FileName)
         size += 100 / len(findFileLists)
         currProgrssbar.set(size)
         progressbar.update()
 
-    for FileName in findFileLists : 
-        TranslateWork(FileName)
-    
-    messagebox.showinfo("작업완료", "작업이 완료되었습니다")
-
-
+def Tessrract_Trans_Start():
+    size = 0
+    for FileName in findFileLists:
+        TesseractFindImageToTextWork(FileName) 
+        size += 100 / len(findFileLists)
+        currProgrssbar.set(size)
+        progressbar.update()
 
 
 window = tkinter.Tk()
@@ -294,6 +326,8 @@ scrollbar["command"] = list.yview
 
 frame.pack()
 
+Clova_transLate_btn = tkinter.Button(window, text = "Clova번역", command = Clova_Trans_Start)
+Tesser_transLate_btn = tkinter.Button(window, text = "Tesseract번역", command = Tessrract_Trans_Start)
 transLate_btn = tkinter.Button(window, text = "번역하기", command = trans_start)
 
 openFolder = tkinter.Button(window, text = "이미지 경로 열기", command = lambda : OpenDirectory("ImageInput"))
@@ -304,6 +338,8 @@ refreshBtn = tkinter.Button(window, text = "새로고침", command = refresh)
 # openTextFolder = tkinter.Button(window, json_ImageText = "Json 경로 열기", command = lambda : OpenDirectory("JsonOutput"))
 # openFolder.config(command = OpenDirectory("ImageTranslate\ImageInput"))
 # btn.config(TransLate)
+Clova_transLate_btn.pack()
+Tesser_transLate_btn.pack()
 transLate_btn.pack()
 openFolder.pack()
 openTextFolder.pack()
@@ -316,10 +352,10 @@ progressbar.pack()
 
 
 # for FileName in findFileLists:
-#     TranslateWork(FileName)
+#     PapagoTranslateWork(FileName)
 
 # for FileName in findFileLists : 
-#     TranslateWork(FileName)
+#     PapagoTranslateWork(FileName)
 
 
 window.mainloop()
