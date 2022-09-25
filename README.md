@@ -58,3 +58,13 @@ pip install pytesseract
 
 ---
 
+---
+
+## **Change Log**
+v1.01
+  - tesserect 번역 방법 추가
+  - json 출력후 바로 번역하지 않고 txt 파일 출력후 번역
+  - gui 변경
+
+---
+
